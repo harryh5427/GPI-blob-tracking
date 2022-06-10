@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -47,6 +48,11 @@ if __name__ == '__main__':
     parser.add_argument('--shear', type=float, default=0.5644)
     
     args = parser.parse_args()
+    
+    if not os.path.isdir('trained_models'):
+        os.mkdir('trained_models')
+    if not os.path.isdir('trained_models/checkpoints'):
+        os.mkdir('trained_models/checkpoints')
     
     if 'raft' in args.name:
         sys.path.append('models/RAFT')

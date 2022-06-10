@@ -10,6 +10,7 @@ import _pickle as cPickle
 import cv2 as cv
 import random
 import argparse
+import os
 
 def make_shear_layer(x1, y1, x2, y2, r, x, y):
     '''
@@ -541,6 +542,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     #Output data "brt_true" size: (num_x - num_margin_xy) X (num_y - num_margin_xy) X (num_t - num_margin_t)
     #Output data "brt_downsampled" size: 12 X 10 X (num_t - num_margin_t)
+    if not os.path.isdir('data/synthetic_gpi'):
+        os.mkdir('data/synthetic_gpi')
+    
     for n in range(args.n_data):
         main(args)
     
