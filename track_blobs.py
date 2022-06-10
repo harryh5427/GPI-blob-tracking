@@ -433,6 +433,12 @@ if __name__ == '__main__':
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
+    parser.add_argument('--num_heads', default=1, type=int,
+                        help='number of heads in attention and aggregation')
+    parser.add_argument('--position_only', default=False, action='store_true',
+                        help='only use position-wise attention')
+    parser.add_argument('--position_and_content', default=False, action='store_true',
+                        help='use position and content-wise attention')
     parser.add_argument('--filename', help="input data file", default='data/real_gpi/65472_0.35.pbz2')
     parser.add_argument('--make_video', help="make video", action='store_true')
     parser.add_argument('--hand_labels', help="make video with hand labels", action='store_true')
