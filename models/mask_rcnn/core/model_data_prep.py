@@ -151,7 +151,7 @@ class GPIDataset(Dataset):
 
 def get_model_instance_segmentation(num_classes, dropout_prob):
     # load an instance segmentation model pre-trained pre-trained on COCO
-    model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True, box_score_thresh=0.95)
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
     
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -163,17 +163,6 @@ def get_model_instance_segmentation(num_classes, dropout_prob):
     hidden_layer = 256
     # and replace the mask predictor with a new one
     model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, num_classes)
-    
-    for layer in model.backbone.body:
-        if layer == 'relu':
-            model.backbone.body[layer] = torch.nn.Sequential(torch.nn.LeakyReLU(inplace=True), torch.nn.Dropout2d(p=0.))
-        elif 'layer' in layer:
-            for sublayer in model.backbone.body[layer]:
-                sublayer.relu = torch.nn.Sequential(torch.nn.LeakyReLU(inplace=True), torch.nn.Dropout2d(p=0.))
-    
-    for i, layer in enumerate(model.roi_heads.mask_head):
-        if layer.__class__.__name__ == 'ReLU':
-            model.roi_heads.mask_head[i] = torch.nn.Sequential(torch.nn.LeakyReLU(inplace=True), torch.nn.Dropout2d(p=dropout_prob))
     
     return model
 
