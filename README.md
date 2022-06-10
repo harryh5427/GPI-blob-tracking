@@ -1,2 +1,2 @@
-# GPI-blob-tracking
-This repository contains the implementation of RAFT, GMA, and Mask R-CNN for tracking blobs in Gas Puff Imaging (GPI) data from tokamak plasmas. 
+# Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device
+Data, models, and code for the paper "Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device" by Woonghee et al., 2022.
