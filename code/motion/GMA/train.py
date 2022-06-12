@@ -149,7 +149,7 @@ def main(args):
             plot_val(logger, args)
             break
 
-    PATH = f'trained_models/{args.name}.pth'
+    PATH = args.output_model + f'/{args.name}.pth'
     torch.save(model.state_dict(), PATH)
     return PATH
 
@@ -181,7 +181,7 @@ def train(model, train_loader, optimizer, scheduler, logger, scaler, args):
             validate(model, args, logger)
             plot_train(logger, args)
             plot_val(logger, args)
-            PATH = args.output + f'/{logger.total_steps+1}_{args.name}.pth'
+            PATH = args.output_ckpt + f'/{logger.total_steps+1}_{args.name}.pth'
             torch.save(model.state_dict(), PATH)
 
         if logger.total_steps >= args.num_steps:
@@ -221,7 +221,7 @@ def plot_val(logger, args):
         plt.xlabel('x_steps')
         plt.ylabel(key)
         plt.title(f'Results for {key} for the validation set')
-        plt.savefig(args.output+f"/gma_{key}.png", bbox_inches='tight')
+        plt.savefig(args.output_ckpt+f"/gma_{key}.png", bbox_inches='tight')
         plt.close()
 
 
@@ -232,5 +232,5 @@ def plot_train(logger, args):
     plt.xlabel('x_steps')
     plt.ylabel('EPE')
     plt.title('Running training error (EPE)')
-    plt.savefig(args.output+"/gma_train_epe.png", bbox_inches='tight')
+    plt.savefig(args.output_ckpt+"/gma_train_epe.png", bbox_inches='tight')
     plt.close()

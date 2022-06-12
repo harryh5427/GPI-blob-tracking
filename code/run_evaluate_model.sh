@@ -1,4 +1,4 @@
 #!/bin/bash
-python evaluate_model.py --model trained_models/raft-synblobs.pth --mixed_precision
-#python evaluate_model.py --model trained_models/gma-synblobs.pth --mixed_precision
-#python evaluate_model.py --model trained_models/mrcnn-synblobs.pth
+python evaluate_model.py --model ../models/raft-synblobs.pth --mixed_precision
+#python evaluate_model.py --model ../models/gma-synblobs.pth --mixed_precision
+#python evaluate_model.py --model ../models/mrcnn-synblobs.pth

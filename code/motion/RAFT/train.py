@@ -155,7 +155,7 @@ def plot_val(logger, args):
         plt.xlabel('x_steps')
         plt.ylabel(key)
         plt.title(f'Results for {key} for the validation set')
-        plt.savefig(args.output+f"/raft_{key}.png", bbox_inches='tight')
+        plt.savefig(args.output_ckpt+f"/raft_{key}.png", bbox_inches='tight')
         plt.close()
 
 
@@ -166,7 +166,7 @@ def plot_train(logger, args):
     plt.xlabel('x_steps')
     plt.ylabel('EPE')
     plt.title('Running training error (EPE)')
-    plt.savefig(args.output+"/raft_train_epe.png", bbox_inches='tight')
+    plt.savefig(args.output_ckpt+"/raft_train_epe.png", bbox_inches='tight')
     plt.close()
 
 
@@ -222,7 +222,7 @@ def main(args):
             logger.push(metrics)
             
             if total_steps % VAL_FREQ == VAL_FREQ - 1:
-                PATH = args.output + '/%d_%s.pth' % (total_steps+1, args.name)
+                PATH = args.output_ckpt + '/%d_%s.pth' % (total_steps+1, args.name)
                 torch.save(model.state_dict(), PATH)
                 
                 results = {}
@@ -252,7 +252,7 @@ def main(args):
                 break
     
     logger.close()
-    PATH = 'trained_models/%s.pth' % args.name
+    PATH = args.output_model + '/%s.pth' % args.name
     torch.save(model.state_dict(), PATH)
     
     return PATH

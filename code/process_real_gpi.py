@@ -43,7 +43,7 @@ def upsample(brt_true, args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filename', help="input data file", default='data/real_gpi/65472_0.35_raw.pbz2')
+    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35_raw.pbz2')
     parser.add_argument('--image_size', type=int, nargs='+', default=[256, 256])
     args = parser.parse_args()
     

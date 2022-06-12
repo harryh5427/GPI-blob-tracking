@@ -6,6 +6,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', default='raft-synblobs', help="name your experiment")
     parser.add_argument('--stage', default='synblobs', help="determines which dataset to use for training")
+    parser.add_argument('--output_model', type=str, default='../models', help='output directory to save the trained model')
+    parser.add_argument('--output_ckpt', type=str, default='../models/checkpoints', help='output directory to save checkpoints and plots')
     parser.add_argument('--restore_ckpt', help="restore checkpoint")
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--validation', type=str, default='synblobs', nargs='+')
@@ -22,21 +24,13 @@ if __name__ == '__main__':
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--gamma', type=float, default=0.8, help='exponential weighting')
     parser.add_argument('--add_noise', action='store_true')
-    
-    parser.add_argument('--output', type=str, default='trained_models/checkpoints', help='output directory to save checkpoints and plots')
-    parser.add_argument('--upsample-learn', action='store_true', default=False,
-                        help='If True, use learned upsampling, otherwise, use bilinear upsampling.')
-    parser.add_argument('--val_freq', type=int, default=10000,
-                        help='validation frequency')
-    parser.add_argument('--print_freq', type=int, default=100,
-                        help='printing frequency')
+    parser.add_argument('--upsample-learn', action='store_true', default=False, help='If True, use learned upsampling, otherwise, use bilinear upsampling.')
+    parser.add_argument('--val_freq', type=int, default=10000, help='validation frequency')
+    parser.add_argument('--print_freq', type=int, default=100, help='printing frequency')
     parser.add_argument('--model_name', default='', help='specify model name')
-    parser.add_argument('--position_only', default=False, action='store_true',
-                        help='only use position-wise attention')
-    parser.add_argument('--position_and_content', default=False, action='store_true',
-                        help='use position and content-wise attention')
-    parser.add_argument('--num_heads', default=1, type=int,
-                        help='number of heads in attention and aggregation')
+    parser.add_argument('--position_only', default=False, action='store_true', help='only use position-wise attention')
+    parser.add_argument('--position_and_content', default=False, action='store_true', help='use position and content-wise attention')
+    parser.add_argument('--num_heads', default=1, type=int, help='number of heads in attention and aggregation')
     
     #Parameters only for Mask R-CNN
     parser.add_argument('--momentum', type=float, default=0.2956)
@@ -49,17 +43,19 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    if not os.path.isdir('trained_models'):
-        os.mkdir('trained_models')
-    if not os.path.isdir('trained_models/checkpoints'):
-        os.mkdir('trained_models/checkpoints')
+    if not os.path.isdir('../models'):
+        os.mkdir('../models')
+    if not os.path.isdir('../models/checkpoints'):
+        os.mkdir('../models/checkpoints')
     
     if 'raft' in args.name:
-        sys.path.append('models/RAFT')
+        sys.path.append('motion/RAFT')
     elif 'gma' in args.name:
-        sys.path.append('models/GMA')
+        sys.path.append('motion/GMA')
     elif 'mrcnn' in args.name:
-        sys.path.append('models/mask_rcnn')
+        sys.path.append('motion/mask_rcnn')
+    elif 'flowwalk' in args.name:
+        sys.path.append('motion/flowwalk')
     
     from train import main
     main(args)

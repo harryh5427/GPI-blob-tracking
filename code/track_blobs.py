@@ -161,12 +161,12 @@ def compute_viou(pred_contours, brt, brt_minimum):
     
     return vious_merged, polygons_pred_merged, polygons_fwhm_merged
 
-def process_image(brt, model_name, device):
-    if model_name in ['raft', 'gma']:
+def process_image(brt, args, device):
+    if args.is_opticalFlow:
         img = np.repeat(brt[np.newaxis, :, :], 3, axis=0)
         img = 1. - torch.from_numpy(img).float()
         img = 255.*img[None]
-    elif model_name == 'mrcnn':
+    else:
         img = np.repeat(brt.T[np.newaxis, :, :], 3, axis=0)
         img = torch.from_numpy(img).float()
     return img.to(device)
@@ -188,7 +188,7 @@ def try_find_contours(arr, val, n_x, n_y):
             pass
     return []
 
-def run_pred(args, model, device):
+def run_pred(args, model, device, predict):
     output = []
     output_tracking = {}
     with torch.no_grad():
@@ -208,21 +208,21 @@ def run_pred(args, model, device):
         y_grid, x_grid = np.meshgrid(y_frame, x_frame)
         points = np.vstack((x_grid.flatten(), y_grid.flatten())).T
         
-        if model_name in ['raft', 'gma']:
+        if args.is_opticalFlow:
             num_iter = n_t - 1
-        elif model_name == 'mrcnn':
+        else:
             num_iter = n_t
         
         for t in range(num_iter):
             print('Working on t = ' + str(t))
-            if model_name in ['raft', 'gma']:
-                image1 = process_image(brt_true[:,:,t], model_name, device)
-                image2 = process_image(brt_true[:,:,t+1], model_name, device)
+            if args.is_opticalFlow:
+                image1 = process_image(brt_true[:,:,t], args, device)
+                image2 = process_image(brt_true[:,:,t+1], args, device)
                 padder = InputPadder(image1.shape)
                 image1, image2 = padder.pad(image1, image2)
-                flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
-                img = image1[0].permute(1,2,0).cpu().numpy()
-                flo = flow_up[0].permute(1,2,0).cpu().numpy()
+                flow_up = predict(model, image1, image2)
+                img = image1[0].permute(1,2,0).detach().cpu().numpy()
+                flo = flow_up[0].permute(1,2,0).detach().cpu().numpy()
                 # map flow to rgb image
                 flo = flow_viz.flow_to_image(flo)
                 img_flo = np.concatenate([img, flo], axis=0)/255.0
@@ -241,11 +241,11 @@ def run_pred(args, model, device):
                         pred_contours += try_find_contours(cmax_arr, val-10, n_x, n_y)
                     
                     len_prev = len(contours)
-            elif model_name == 'mrcnn':
+            else:
                 output.append(brt_true[:,:,t])
-                image = process_image(brt_true[:,:,t], model_name, device)
-                result = model([image])[0]
-                pred_masks = np.transpose(result['masks'][result['labels'] == 2][:,0,:,:].cpu().numpy(), (0,2,1))
+                image = process_image(brt_true[:,:,t], args, device)
+                result = predict(model, image)
+                pred_masks = np.transpose(result['masks'][result['labels'] == 2][:,0,:,:].detach().cpu().numpy(), (0,2,1))
                 pred_contours = []
                 for i in range(np.shape(pred_masks)[0]):
                     pred_contours += measure.find_contours(pred_masks[i,:,:], 0.90)
@@ -357,21 +357,13 @@ def plot_frame(t, output, output_tracking, axes, args, hand_labels=None):
         track.remove()
     figs_hl = []
     
-    model_name = ''
-    if 'raft' in args.model:
-        model_name = 'RAFT'
-    elif 'gma' in args.model:
-        model_name = 'GMA'
-    elif 'mrcnn' in args.model:
-        model_name = 'Mask R-CNN'
-    
-    if model_name in ['RAFT', 'GMA']:
+    if args.is_opticalFlow:
         img_flo = output[t]
         img = 1. - img_flo[:256,:,0]
         flo = img_flo[256:256*2,:,:]
         im1 = axes[1].imshow(np.transpose(flo, (1,0,2)), vmin=0, vmax=1, origin='lower')
-        axes[1].set_title('Optical flow, PREDICTED by ' + model_name)
-    elif model_name == 'Mask R-CNN':
+        axes[1].set_title('Optical flow, PREDICTED by ' + args.model_label)
+    else:
         img = output[t]
     
     im0 = axes[0].imshow(img.T, vmin=0, vmax=1, origin='lower')
@@ -394,7 +386,7 @@ def plot_frame(t, output, output_tracking, axes, args, hand_labels=None):
         pred_mask = get_poly_mask(points, polygon_pred, n_x, n_y).astype(float)
         figs_pred.append(axes[-1].contour(x_grid*n_x, y_grid*n_y, pred_mask, colors='r', linewidths=2))
     
-    axes[-1].set_title('Blob tracking by ' + model_name)
+    axes[-1].set_title('Blob tracking by ' + args.model_label)
     axes[-1].set_xlim(0., n_x)
     axes[-1].set_ylim(0., n_y)
     
@@ -408,15 +400,7 @@ def plot_frame(t, output, output_tracking, axes, args, hand_labels=None):
 
 def init():
     global args, axes, hand_labels
-    model_name = ''
-    if 'raft' in args.model:
-        model_name = 'RAFT'
-    elif 'gma' in args.model:
-        model_name = 'GMA'
-    elif 'mrcnn' in args.model:
-        model_name = 'Mask R-CNN'
-    
-    axes[-1].plot([], c='r', label=model_name)
+    axes[-1].plot([], c='r', label=args.model_label)
     if args.hand_labels:
         for i in range(len(hand_labels)):
             axes[-1].scatter([], [], c='C' + str(i), s=40, label='Labeler ' + str(i+1))
@@ -429,51 +413,83 @@ def init():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', help="load model", default='trained_models/raft-synblobs.pth')
-    parser.add_argument('--small', action='store_true', help='use small model')
-    parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
-    parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
-    parser.add_argument('--num_heads', default=1, type=int,
-                        help='number of heads in attention and aggregation')
-    parser.add_argument('--position_only', default=False, action='store_true',
-                        help='only use position-wise attention')
-    parser.add_argument('--position_and_content', default=False, action='store_true',
-                        help='use position and content-wise attention')
-    parser.add_argument('--filename', help="input data file", default='data/real_gpi/65472_0.35.pbz2')
+    parser.add_argument('--model', help="load model", default='../models/raft-synblobs.pth')
+    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35.pbz2')
     parser.add_argument('--make_video', help="make video", action='store_true')
     parser.add_argument('--hand_labels', help="make video with hand labels", action='store_true')
     parser.add_argument('--viou_threshold', type=float, default=0.5, help="threshold for filtering prediction based on VIoU")
     parser.add_argument('--amp_threshold', type=float, default=0.75, help="threshold for filtering prediction based on blob amplitude")
     parser.add_argument('--blob_life_threshold', type=int, default=15, help="threshold for filtering prediction based on blob life span")
-    args = parser.parse_args()
+    parser.add_argument('--small', action='store_true', help='use small model')
+    parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
+    parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
+    parser.add_argument('--num_heads', default=1, type=int, help='number of heads in attention and aggregation')
+    parser.add_argument('--position_only', default=False, action='store_true', help='only use position-wise attention')
+    parser.add_argument('--position_and_content', default=False, action='store_true', help='use position and content-wise attention')
     
+    args = parser.parse_args()
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model_name = ''
     if 'raft' in args.model:
+        parser.add_argument('--is_opticalFlow', default=True)
+        parser.add_argument('--model_label', default='RAFT')
         model_name = 'raft'
-        sys.path.append('models/RAFT/core')
+        sys.path.append('motion/RAFT/core')
         from utils import flow_viz
         from utils.utils import InputPadder
         from raft import RAFT
         model = torch.nn.DataParallel(RAFT(args))
         model.load_state_dict(torch.load(args.model, map_location=device))
         model = model.module
+        def predict(model, image1, image2):
+            flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
+            return flow_up
     elif 'gma' in args.model:
+        parser.add_argument('--is_opticalFlow', default=True)
+        parser.add_argument('--model_label', default='GMA')
         model_name = 'gma'
-        sys.path.append('models/GMA/core')
+        sys.path.append('motion/GMA/core')
         from utils import flow_viz
         from utils.utils import InputPadder
         from network import RAFTGMA
         model = torch.nn.DataParallel(RAFTGMA(args))
         model.load_state_dict(torch.load(args.model, map_location=device))
         model = model.module
+        def predict(model, image1, image2):
+            flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
+            return flow_up
     elif 'mrcnn' in args.model:
+        parser.add_argument('--is_opticalFlow', default=False)
+        parser.add_argument('--model_label', default='Mask R-CNN')
         model_name = 'mrcnn'
-        sys.path.append('models/mask_rcnn/core')
+        sys.path.append('motion/mask_rcnn/core')
         from model_data_prep import *
         model = get_model_instance_segmentation(3, dropout_prob=0.)
         model.load_state_dict(torch.load(args.model, map_location=device))
+        def predict(model, image):
+            result = model([image])[0]
+            return result
+    elif 'flowwalk' in args.model:
+        parser.add_argument('--is_opticalFlow', default=True)
+        parser.add_argument('--model_label', default='Flow Walk')
+        model_name = 'flowwalk'
+        sys.path.append('motion/flowwalk/core')
+        from utils import flow_viz
+        from utils.utils import InputPadder
+        from Regressor import PWCLite
+        from easydict import EasyDict
+        cfg = EasyDict({"n_frames": 2, "reduce_dense": True, "type": "pwclite", "upsample": True})
+        model = torch.nn.DataParallel(PWCLite(cfg))
+        model.load_state_dict(torch.load(args.model, map_location=device))
+        model = model.module
+        def predict(model, image1, image2):
+            im_all = torch.cat([image1, image2], 1)/255.
+            flow_pred = model(im_all)['flows_fw']
+            flow_predictions = [flow_pred[0]]
+            flow_predictions[0][:,0,:,:] *= 255.
+            return flow_predictions[0]
     
+    args = parser.parse_args()
     print(f"Loaded checkpoint at {args.model}")
     model.to(device)
     model.eval()
@@ -485,7 +501,7 @@ if __name__ == '__main__':
         output = data['output']
         output_tracking = data['output_tracking']
     else:
-        output, output_tracking = run_pred(args, model, device)
+        output, output_tracking = run_pred(args, model, device, predict)
         data = {'output':np.array(output), 'output_tracking':output_tracking}
         with open(save_name_prefix + '.pickle', 'wb') as handle:
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -494,9 +510,9 @@ if __name__ == '__main__':
         figs_pred, figs_fwhm, figs_id, figs_hl = [], [], [], []
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=7200)
-        if model_name in ['raft', 'gma']:
+        if args.is_opticalFlow:
             fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4))
-        elif model_name == 'mrcnn':
+        else:
             fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(7, 4))
         
         if args.hand_labels:
