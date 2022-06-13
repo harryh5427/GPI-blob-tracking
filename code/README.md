@@ -57,13 +57,13 @@ Your raw GPI data (.pickle file) must have the following variables:
 
 | Variable          | Description                                  | Dimension |
 | ----------------- |----------------------------------------------|-----------|
-| `brt_true` | The brightness video array measured by GPI   | (number of GPI views in R-axis) X (number of GPI views in z-axis) X (number of time points) (e.g. 12 X 10 X 1000)|
+| `brt_arr` | The brightness video array measured by GPI   | (number of GPI views in R-axis) X (number of GPI views in z-axis) X (number of time points) (e.g. 12 X 10 X 1000)|
 | `r_arr`  | The actual R-coordinates of the GPI views    | (number of GPI views in R-axis) X (number of GPI views in z-axis) (e.g. 12 X 10)|
 | `z_arr`  | The actual z-coordinates of the GPI views    | (number of GPI views in R-axis) X (number of GPI views in z-axis) (e.g. 12 X 10)|
 | `shear_contour_x`  | The x-indices of pixels corresponding to the shear layer (LCFS)    | The dimension may vary. If LCFS covers across the whole height of the image, the dimension is (ny_upsample). (e.g. 256)|
 | `shear_contour_y`  | The y-indices of pixels corresponding to the shear layer (LCFS)    | The dimension may vary. If LCFS covers across the whole height of the image, the dimension is (ny_upsample). (e.g. 256)|
 
-As shown in the above table, your "brt_true" is the video data recorded from each GPI views. This will be upsampled to (nx_upsample) X (ny_upsample) X (number of time points) onto a regular grid using "r_arr" and "z_arr" which are typically irregular grid of GPI views. The indices of your "brt_true" with dead views must have NaN and will be interpolated.
+As shown in the above table, your "brt_arr" is the video data recorded from each GPI views. This will be upsampled to (nx_upsample) X (ny_upsample) X (number of time points) onto a regular grid using "r_arr" and "z_arr" which are typically irregular grid of GPI views. The indices of your "brt_true" with dead views must have NaN and will be interpolated.
 
 "shear_contour_x" and "shear_contour_y" must have the same dimension, and their indices values must correspond to the upsampled grid (i.e. you should interpolate your LCFS coordinates).
 
