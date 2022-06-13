@@ -46,7 +46,14 @@ The field values used in this work are in "run_train_model.sh" for each model. T
 You can get the evaluation scores of a trained model on synthetic GPI data by running "run_evaluate_model.sh". This will print out the scores on the validation dataset with the metric corresponding to each model.
 
 # Processing real GPI data
-You can pre-process your own GPI data. The brightness is upsampled and standardized by running "run_process_real_gpi.sh". For this, you must specify the directory to your raw GPI data file using --filename field. Your data must be located in "GPI-blob-tracking/data/real_gpi". Your raw GPI data (.pickle file) must have the following variables:
+You can pre-process your own GPI data. The brightness is upsampled and standardized by running "run_process_real_gpi.sh". The key fields used are as following:
+
+| Field          | Description                                           | Default    |
+| -------------- |-------------------------------------------------------| ----------:|
+| `--filename`   | The directory to your raw GPI data file               | '../data/real_gpi/65472_0.35_raw.pickle' |
+| `--image_size` | The size of the image (width X height) for upsampling | [256, 256] |
+
+Your raw GPI data (.pickle file) must have the following variables:
 
 | Variable          | Description                                  | Dimension |
 | ----------------- |----------------------------------------------|-----------|
