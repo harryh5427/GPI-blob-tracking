@@ -517,7 +517,7 @@ if __name__ == '__main__':
         
         if args.hand_labels:
             hand_labels = []
-            handlabel_files = sorted(glob(osp.join(args.filename.split('.pbz2')[0], '_hand_label_*.pickle')))
+            handlabel_files = sorted(glob.glob(args.filename.split('.pbz2')[0] + '_hand_label_*.pickle'))
             for file in handlabel_files:
                 with open(file, 'rb') as handle:
                     hand_labels.append(pickle.load(handle))

@@ -531,6 +531,7 @@ if __name__ == '__main__':
     parser.add_argument('--image_size', type=int, nargs='+', default=[256, 256])
     parser.add_argument('--n_frame', type=int, help="Number of frames in a file (>= 200)", default=200)
     parser.add_argument('--n_data', type=int, help="Number of data files to generate", default=30)
+    parser.add_argument('--val_prop', type=int, help="Proportion of total frames for validation data", default=0.05)
     parser.add_argument('--output', type=str, help="output directory to save data", default='../data/synthetic_gpi')
     args = parser.parse_args()
     #Output data "brt_true" size: (num_x - num_margin_xy) X (num_y - num_margin_xy) X (num_t - num_margin_t)
@@ -542,7 +543,7 @@ if __name__ == '__main__':
         main(args)
     
     num_all = args.n_data*(max(args.n_frame, 200) - 1)
-    idx_val = random.sample(range(num_all), int(num_all*0.05))
+    idx_val = random.sample(range(num_all), int(num_all*args.val_prop))
     idx = [1]*num_all
     for i in idx_val:
         idx[i] = 2

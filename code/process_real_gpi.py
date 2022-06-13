@@ -5,6 +5,17 @@ import pickle
 import _pickle as cPickle
 from scipy.interpolate import Rbf
 
+def upsample(args, brt_arr, r_arr, z_arr):
+    n_x, n_y = args.image_size
+    n_t = np.shape(brt_arr)[2]
+    brt_upsampled = np.zeros((n_x, n_y, n_t))
+    y_grid, x_grid = np.meshgrid(np.linspace(np.min(z_arr), np.max(z_arr), n_y), np.linspace(np.min(r_arr), np.max(r_arr), n_x))
+    for t in range(n_t):
+        idx_nan = np.isnan(brt_arr[:,:,t])
+        brt_upsampled[:,:,t] = Rbf(r_arr[~idx_nan], z_arr[~idx_nan], brt_arr[:,:,t][~idx_nan], function='cubic')(x_grid, y_grid)
+    
+    return brt_upsampled
+
 def normalize_brt(brt_true, idx_shear_x, idx_shear_y):
     mean_brt_arr = np.repeat(np.mean(brt_true, axis=2)[:, :, np.newaxis], np.shape(brt_true)[2], axis=2)
     std_view = np.std(brt_true, axis=2)
@@ -29,36 +40,22 @@ def normalize_brt(brt_true, idx_shear_x, idx_shear_y):
     
     return brt_true
 
-def upsample(brt_true, args):
-    n_x, n_y = args.image_size
-    n_x_raw, n_y_raw, n_t = np.shape(brt_true)
-    brt_upsampled = np.zeros((n_x, n_y, n_t))
-    for t in range(n_t):
-        y_grid, x_grid = np.meshgrid(np.linspace(0., 1., n_y), np.linspace(0., 1., n_x))
-        y_grid_raw, x_grid_raw = np.meshgrid(np.linspace(0., 1., n_y_raw), np.linspace(0., 1., n_x_raw))
-        brt_upsampled[:,:,t] = Rbf(x_grid_raw, y_grid_raw, brt_true[:,:,t], function='cubic')(x_grid, y_grid)
-    
-    return brt_upsampled
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35_raw.pbz2')
+    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35_raw.pickle')
     parser.add_argument('--image_size', type=int, nargs='+', default=[256, 256])
     args = parser.parse_args()
     
-    with bz2.BZ2File(args.filename, 'rb') as f:
-        data = cPickle.load(f, encoding='latin1')
+    with open(args.filename, 'rb') as f:
+        data = pickle.load(f)
     
-    brt_true = data['brt_true']
+    brt_arr = data['brt_arr']
+    r_arr = data['r_arr']
+    z_arr = data['z_arr']
     shear_contour_x = data['shear_contour_x']
     shear_contour_y = data['shear_contour_y']
     
-    n_x, n_y = args.image_size
-    n_x_raw, n_y_raw, n_t = np.shape(brt_true)
-    if n_x != n_x_raw or n_y != n_y_raw:
-        brt_true = upsample(brt_true, args)
-    
+    brt_true = upsample(args, brt_arr, r_arr, z_arr)
     brt_true = normalize_brt(brt_true, shear_contour_x, shear_contour_y)
     
     output = {'brt_true':brt_true, 'shear_contour_x':shear_contour_x, 'shear_contour_y':shear_contour_y}
