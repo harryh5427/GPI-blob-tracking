@@ -63,7 +63,7 @@ Your raw GPI data (.pickle file) must have the following variables:
 | `shear_contour_x`  | The x-indices of pixels corresponding to the shear layer (LCFS)    | The dimension may vary. If LCFS covers across the whole height of the image, the dimension is (ny_upsample). (e.g. 256)|
 | `shear_contour_y`  | The y-indices of pixels corresponding to the shear layer (LCFS)    | The dimension may vary. If LCFS covers across the whole height of the image, the dimension is (ny_upsample). (e.g. 256)|
 
-As shown in the above table, your "brt_arr" is the video data recorded from each GPI views. This will be upsampled to (nx_upsample) X (ny_upsample) X (number of time points) onto a regular grid using "r_arr" and "z_arr" which are typically irregular grid of GPI views. The indices of your "brt_true" with dead views must have NaN and will be interpolated.
+As shown in the above table, your "brt_arr" is the video data recorded from each GPI views. This will be upsampled to (nx_upsample) X (ny_upsample) X (number of time points) onto a regular grid from "r_arr" and "z_arr" which are typically irregular grid of GPI views. The indices of your "brt_true" with dead views must have NaN and will be interpolated.
 
 "shear_contour_x" and "shear_contour_y" must have the same dimension, and their indices values must correspond to the upsampled grid (i.e. you should interpolate your LCFS coordinates).
 
