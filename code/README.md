@@ -40,7 +40,7 @@ You can train a model in "motion" folder by running "run_train_model.sh". The ke
 | `--gamma`      | Exponential weighting                        |
 | `--wdecay`     | Weight decay                                 |
 
-The fields used in this work are in "run_train_model.sh" for each model. The output model will be saved in "GPI-blob-tracking/models".
+The field values used in this work are in "run_train_model.sh" for each model. The output model will be saved in "GPI-blob-tracking/models".
 
 # Evaluating trained models with synthetic GPI data
 You can get the evaluation scores of a trained model on synthetic GPI data by running "run_evaluate_model.sh". This will print out the scores on the validation dataset with the metric corresponding to each model.
