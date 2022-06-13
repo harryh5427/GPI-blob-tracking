@@ -65,7 +65,7 @@ Your raw GPI data (.pickle file) must have the following variables:
 
 As shown in the above table, your "brt_true" is the video data recorded from each GPI views. This will be upsampled to (nx_upsample) X (ny_upsample) X (number of time points) onto a regular grid using "r_arr" and "z_arr" which are typically irregular grid of GPI views. The indices of your "brt_true" with dead views must have NaN and will be interpolated.
 
-"shear_contour_x" and "shear_contour_y" must have the dimension matching to the desired upsampling resolution (i.e. you should interpolate your LCFS coordinates).
+"shear_contour_x" and "shear_contour_y" must have the same dimension, and their indices values must correspond to the upsampled grid (i.e. you should interpolate your LCFS coordinates).
 
 The processed data will be saved in "GPI-blob-tracking/data/real_gpi".
 
