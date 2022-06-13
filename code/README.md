@@ -91,6 +91,3 @@ The result file will be saved in "GPI-blob-tracking/data/real_gpi" and will cont
 | `output_tracking` | The dictionary with keys as time index and values as the list of blob informations at that time. The blob information is [Blob ID, VIoU, x of blob center of mass, y of blob center of mass, polygon of the predicted blob, polygon of the brightness contour around this blob]   |
 
 For hand labels, your file must be located in "GPI-blob-tracking/data/real_gpi/" and have dictionary with the keys as time index and values as the list of tuples where each tuple is (x, y) of the center of mass of the blobs labeled by human.
-
-# Implementing your own motion detection model
-You can implement additional models of your choice in "GPI-blob-tracking/code/motion" folder. It must have the model files loadable in PyTorch, as well as a script for training. You can check how the models like RAFT are implemented and set up a similar pipeline. Some parts in the codes for training and tracking in "GPI-blob-tracking/code" should also be changed accordingly.
