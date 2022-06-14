@@ -26,8 +26,9 @@ You can generate a set of synthetic GPI data for training dataset by running the
 | `--n_frame`    | The number of frames in a file                      | 200        |
 | `--n_data`     | The number of data files to generate                | 30         |
 | `--val_prop`   | The proportion of total frames for validation data  | 0.05       |
+| `--test`       | Use when you generate testing dataset               | False      |
 
-The output files will be saved in "GPI-blob-tracking/data/synthetic_gpi".
+The output files will be saved in "GPI-blob-tracking/data/synthetic_gpi". For testing dataset, the save directory is "GPI-blob-tracking/data/synthetic_gpi/testing".
 
 # Training models with synthetic GPI data
 You can train a model in "motion" folder by running "run_train_model.sh". The key fields used are as following:
