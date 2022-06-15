@@ -22,7 +22,7 @@ You can generate a set of synthetic GPI data for training dataset by running the
 
 | Field          | Description                                         | Default    |
 | -------------- |-----------------------------------------------------| ----------:|
-| `--image_size` | The size of the image (width X height)              | [256, 256] |
+| `--image_size` | The size of the image (width X height)              | 256 256    |
 | `--n_frame`    | The number of frames in a file                      | 200        |
 | `--n_data`     | The number of data files to generate                | 30         |
 | `--val_prop`   | The proportion of total frames for validation data  | 0.05       |
@@ -52,7 +52,7 @@ You can pre-process your own GPI data. The brightness is upsampled and standardi
 | Field          | Description                                           | Default    |
 | -------------- |-------------------------------------------------------| ----------:|
 | `--filename`   | The directory to your raw GPI data file               | '../data/real_gpi/65472_0.35_raw.pickle' |
-| `--image_size` | The size of the image (width X height) for upsampling | [256, 256] |
+| `--image_size` | The size of the image (width X height) for upsampling | 256 256    |
 
 Your raw GPI data (.pickle file) must have the following variables:
 
