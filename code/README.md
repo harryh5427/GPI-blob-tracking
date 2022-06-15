@@ -1,9 +1,9 @@
 # Packages required
 Packages installed for this work are as following:
 
-| Package | `python` | `pytorch` | `torchvision` | `numpy` | `scipy` | `matplotlib` | `ffmpeg` | `opencv` | `shapely` | `pillow` |
-| --------|----------|-----------|---------------|---------|---------|--------------|----------|----------|-----------|----------|
-| Version | 3.8.12   | 1.7.1     | 0.8.2         | 1.19.2  | 1.4.1   | 3.5.0        | 4.2.2    | 3.4.10   | 1.7.1     | 8.4.0    |
+| Package | `python` | `pytorch` | `torchvision` | `numpy` | `scipy` | `scikit-image`| `matplotlib` | `ffmpeg` | `opencv` | `shapely` | `pillow` |
+| --------|----------|-----------|---------------|---------|---------|---------------|--------------|----------|----------|-----------|----------|
+| Version | 3.8.12   | 1.7.1     | 0.8.2         | 1.19.2  | 1.4.1   | 0.18.3        | 3.5.0        | 4.2.2    | 3.4.10   | 1.7.1     | 8.4.0    |
 
 To use Mask R-CNN, you need
 
