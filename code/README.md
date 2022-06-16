@@ -44,7 +44,13 @@ You can train a model in "motion" folder by running "run_train_model.sh". The ke
 The field values used in this work are in "run_train_model.sh" for each model. The output model will be saved in "GPI-blob-tracking/models".
 
 # Evaluating trained models with synthetic GPI data
-You can get the evaluation scores of a trained model on synthetic GPI data by running "run_evaluate_model.sh". This will print out the scores on the validation dataset with the metric corresponding to each model.
+You can get the evaluation scores of a trained model on synthetic GPI data by running "run_evaluate_model.sh" which will print out the scores. The key fields used are as following:
+
+| Field          | Description                                  |
+| -------------- |----------------------------------------------|
+| `--model`      | The directory to the trained model file.     |
+| `--mode`       | Mode can be 'training', 'validation', or 'testing' depending on the dataset |
+| `--metric`     | Metric can be either 'epe', or 'viou'        |
 
 # Processing real GPI data
 You can pre-process your own GPI data. The brightness is upsampled and standardized by running "run_process_real_gpi.sh". The key fields used are as following:
