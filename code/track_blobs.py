@@ -510,7 +510,7 @@ if __name__ == '__main__':
     for t in range(len(output_tracking)):
         for info in output_tracking[t]:
             _, viou, _, _, _, _ = info
-            viou_all.append(viou_i)
+            viou_all.append(viou)
     print(parser.model_label + " Mean VIoU: " + str(np.mean(viou_all)))
     
     if args.make_video:
