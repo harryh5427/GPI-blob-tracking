@@ -181,17 +181,7 @@ def main(args):
     print("Parameter Count: %d" % count_parameters(model))
     
     if args.restore_ckpt is not None:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        ckpt = torch.load(args.restore_ckpt, map_location=torch.device(device))
-        weights = ckpt['state_dict']
-        # handle the scenario when keys do not exactly match
-        new_weights = OrderedDict()
-        model_keys = list(model.state_dict().keys())
-        weight_keys = list(weights.keys())
-        for a, b in zip(model_keys, weight_keys):
-            new_weights[a] = weights[b]
-        weights = new_weights
-        model.load_state_dict(weights, strict=False)
+        model.load_state_dict(torch.load(args.restore_ckpt), strict=False)
     
     model.cuda()
     model.train()
@@ -219,35 +209,10 @@ def main(args):
                 image2 = (image2 + stdv * torch.randn(*image2.shape).cuda()).clamp(0.0, 255.0)
             
             im_all = torch.cat([image1, image2], 1)/255.
-            #im_all = im_all.permute((0,1,3,2))
             flow_pred = model(im_all)['flows_fw']
             flow_predictions = [flow_pred[0]]
-            #flow_predictions = [flow_pred[0].permute(0,1,3,2)]
             flow_predictions[0][:,0,:,:] *= 255.
-            #flow[:,0,:,:] /= 255.
             
-            '''
-            im_all = [np.transpose(image1[0].numpy(), (1,2,0)), np.transpose(image2[0].numpy(), (1,2,0))]
-            for _i, _inputs in enumerate(im_all):
-                im_all[_i] = 1.0 * im_all[_i]/255.0
-                im_all[_i] = np.transpose(im_all[_i], (2, 0, 1))
-                im_all[_i] = torch.from_numpy(im_all[_i])
-                im_all[_i] = im_all[_i].expand(1, im_all[_i].size()[0], im_all[_i].size()[1], im_all[_i].size()[2])
-                im_all[_i] = im_all[_i].float()
-            
-            im_all = torch.autograd.Variable(torch.cat(im_all,1).cuda(), volatile=True)
-            im_all = torch.autograd.Variable(torch.cat(im_all,1), volatile=True)
-            im_all.size()
-            torch.Size([1, 6, 256, 256])
-            
-            flo = flow_predictions[0][0].permute(1,2,0).detach().numpy()
-            flo = flow_viz.flow_to_image(flo)[:, :, [2,1,0]]/255.0
-            plt.imshow(np.transpose(flo, (1,0,2)))
-            
-            
-            im_all = torch.cat([image1, image2], 1)
-            flow_predictions = model(im_all)['flows_fw'][0][0]
-            '''
             loss, metrics = sequence_loss(flow_predictions, flow, valid, args.gamma, MAX_FLOW)
             scaler.scale(loss).backward()
             scaler.unscale_(optimizer)                

@@ -515,15 +515,21 @@ def main(args):
     shear_contour_x = shear_contour[num_margin_xy//2 : num_x - num_margin_xy//2] - num_margin_xy//2
     shear_contour_y = np.arange(0, num_x - num_margin_xy)
     data = {'brt_true':brt_true, 'brt_downsampled':brt_downsampled, 'shear_contour_x':shear_contour_x, 'shear_contour_y':shear_contour_y, 'blob_mask':blob_mask, 'blob_type':blob_types, 'hsv':hsv}
-    with bz2.BZ2File(args.output + '/synthetic_gpi_' + "{:03d}".format(n+1) + '.pbz2', 'w') as f:
+    testing_folder = ''
+    if args.test:
+        if not os.path.isdir(args.output + '/testing'):
+            os.mkdir(args.output + '/testing')
+        testing_folder = '/testing'
+    
+    with bz2.BZ2File(args.output + testing_folder + '/synthetic_gpi_' + "{:03d}".format(n+1) + '.pbz2', 'w') as f:
         cPickle.dump(data, f)
     
     for t in range(np.shape(hsv)[3] - 1):
         vx = hsv[0, :, :, t] * np.cos(hsv[1, :, :, t])
         vy = hsv[0, :, :, t] * np.sin(hsv[1, :, :, t])
-        writeFlow(args.output + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_flow.flo', vx, vy)
-        cv.imwrite(args.output + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_img1.png', 255.*(1. - brt_true[:, :, t]))
-        cv.imwrite(args.output + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_img2.png', 255.*(1. - brt_true[:, :, t+1]))
+        writeFlow(args.output + testing_folder + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_flow.flo', vx, vy)
+        cv.imwrite(args.output + testing_folder + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_img1.png', 255.*(1. - brt_true[:, :, t]))
+        cv.imwrite(args.output + testing_folder + '/' + "{:05d}".format((num_t-num_margin_t)*n + t) + '_img2.png', 255.*(1. - brt_true[:, :, t+1]))
 
 
 if __name__ == '__main__':
@@ -533,6 +539,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_data', type=int, help="Number of data files to generate", default=30)
     parser.add_argument('--val_prop', type=int, help="Proportion of total frames for validation data", default=0.05)
     parser.add_argument('--output', type=str, help="output directory to save data", default='../data/synthetic_gpi')
+    parser.add_argument('--test', help="generate testing dataset", action='store_true')
     args = parser.parse_args()
     #Output data "brt_true" size: (num_x - num_margin_xy) X (num_y - num_margin_xy) X (num_t - num_margin_t)
     #Output data "brt_downsampled" size: 12 X 10 X (num_t - num_margin_t)
@@ -542,12 +549,13 @@ if __name__ == '__main__':
     for n in range(args.n_data):
         main(args)
     
-    num_all = args.n_data*(max(args.n_frame, 200) - 1)
-    idx_val = random.sample(range(num_all), int(num_all*args.val_prop))
-    idx = [1]*num_all
-    for i in idx_val:
-        idx[i] = 2
-    
-    with open(args.output + '/synblobs_split.txt', 'w') as f:
-        for item in idx:
-            f.write("%s\n" % item)
+    if not args.test:
+        num_all = args.n_data*(max(args.n_frame, 200) - 1)
+        idx_val = random.sample(range(num_all), int(num_all*args.val_prop))
+        idx = [1]*num_all
+        for i in idx_val:
+            idx[i] = 2
+        
+        with open(args.output + '/synblobs_split.txt', 'w') as f:
+            for item in idx:
+                f.write("%s\n" % item)

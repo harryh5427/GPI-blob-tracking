@@ -5,6 +5,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help="load model", default='../models/raft-synblobs.pth')
     parser.add_argument('--dataset', default='synblobs', help="dataset for evaluation")
+    parser.add_argument('--mode', default='validation', help="mode can be 'training', 'validation', or 'testing'")
+    parser.add_argument('--metric', default='epe', help="metric can be 'epe', or 'viou'")
     parser.add_argument('--small', action='store_true', help='use small model')
     parser.add_argument('--mixed_precision', action='store_true', help='use mixed precision')
     parser.add_argument('--alternate_corr', action='store_true', help='use efficent correlation implementation')
@@ -26,8 +28,13 @@ if __name__ == '__main__':
         sys.path.append('motion/GMA')
     elif 'mrcnn' in args.model:
         sys.path.append('motion/mask_rcnn')
+    elif 'flowwalk' in args.model:
+        sys.path.append('motion/flowwalk')
     
-    from evaluate import *
+    if args.metric == 'viou':
+        from evaluate_viou import *
+    else:
+        from evaluate import *
     
     main(args)
 

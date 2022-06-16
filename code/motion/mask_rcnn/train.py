@@ -18,7 +18,7 @@ def main(args):
     mask_threshold = 0.95
     num_mc_passes = 100
     
-    files = sorted(glob(osp.join('data/synthetic_gpi', 'synthetic_gpi_*.pbz2')))
+    files = sorted(glob(osp.join('../data/synthetic_gpi', 'synthetic_gpi_*.pbz2')))
     dataset = []
     for file in files:
         with bz2.BZ2File(file, 'rb') as f:
@@ -27,7 +27,7 @@ def main(args):
     data_aug_p_train = {"horizontalFlip":args.horizontalFlip, "scale":args.scale, "translate":args.translate, "rotate":args.rotate, "shear":args.shear}
     
     images_original, objects_original = process(device, dataset)
-    split_list = np.loadtxt('data/synthetic_gpi/synblobs_split.txt', dtype=np.int32)
+    split_list = np.loadtxt('../data/synthetic_gpi/synblobs_split.txt', dtype=np.int32)
     split_list = np.append(split_list, [1]*(len(objects_original) - len(split_list)))
     
     objects_original_train, objects_original_test = [], []
@@ -94,8 +94,8 @@ def main(args):
         # update the learning rate
         lr_scheduler.step()
         checkpoint = {'epoch': epoch, 'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'lr_scheduler': lr_scheduler, 'avg_losses':avg_losses}
-        torch.save(checkpoint, args.output + f'/{args.name}.pt')
+        torch.save(checkpoint, args.output_ckpt + f'/{args.name}.pt')
     
-    PATH = f'trained_models/{args.name}.pth'
+    PATH = args.output_model + '/%s.pth' % args.name
     torch.save(model.state_dict(), PATH)
 

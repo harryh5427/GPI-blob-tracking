@@ -414,7 +414,7 @@ def init():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help="load model", default='../models/raft-synblobs.pth')
-    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35.pbz2')
+    parser.add_argument('--filename', help="input data file", default='../data/real_gpi/65472_0.35_processed.pbz2')
     parser.add_argument('--make_video', help="make video", action='store_true')
     parser.add_argument('--hand_labels', help="make video with hand labels", action='store_true')
     parser.add_argument('--viou_threshold', type=float, default=0.5, help="threshold for filtering prediction based on VIoU")
@@ -494,7 +494,7 @@ if __name__ == '__main__':
     model.to(device)
     model.eval()
     
-    save_name_prefix = args.filename.split('.pbz2')[0] + '_' + model_name
+    save_name_prefix = args.filename.split('_processed.pbz2')[0] + '_' + model_name
     if glob.glob(save_name_prefix + '.pickle'):
         with open(save_name_prefix + '.pickle', 'rb') as handle:
             data = pickle.load(handle)

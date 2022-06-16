@@ -59,5 +59,5 @@ if __name__ == '__main__':
     brt_true = normalize_brt(brt_true, shear_contour_x, shear_contour_y)
     
     output = {'brt_true':brt_true, 'shear_contour_x':shear_contour_x, 'shear_contour_y':shear_contour_y}
-    with bz2.BZ2File(args.filename.split('_raw')[0] + '.pbz2', 'w') as f:
+    with bz2.BZ2File(args.filename.split('_raw')[0] + '_processed.pbz2', 'w') as f:
         cPickle.dump(output, f)
