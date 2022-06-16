@@ -506,6 +506,13 @@ if __name__ == '__main__':
         with open(save_name_prefix + '.pickle', 'wb') as handle:
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
+    viou_all = []
+    for t in range(len(output_tracking)):
+        for info in output_tracking[t]:
+            _, viou, _, _, _, _ = info
+            viou_all.append(viou_i)
+    print(parser.model_label + " Mean VIoU: " + str(np.mean(viou_all)))
+    
     if args.make_video:
         figs_pred, figs_fwhm, figs_id, figs_hl = [], [], [], []
         Writer = animation.writers['ffmpeg']

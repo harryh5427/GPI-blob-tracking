@@ -111,5 +111,5 @@ def main(args):
     model.eval()
     
     ious = get_ious(dataset, model, device, mask_threshold)
-    print("Mask R-CNN " + print_label + " Mean IoU: " + str(np.mean(ious[2])))
+    print("Mask R-CNN " + print_label + " Mean VIoU: " + str(np.mean(ious[2])))
 

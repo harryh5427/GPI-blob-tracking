@@ -140,5 +140,5 @@ def main(args):
             if len(iou[iou > 0.1]) > 0:
                 iou_all.append(np.mean(iou[iou > 0.1]))
     
-    print("RAFT " + print_label + " Mean IoU: " + str(np.mean(iou_all)))
+    print("RAFT " + print_label + " Mean VIoU: " + str(np.mean(iou_all)))
 
