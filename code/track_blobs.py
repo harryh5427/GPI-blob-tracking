@@ -22,6 +22,7 @@ import shapely
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from scipy.optimize import linear_sum_assignment
+import time
 
 
 def gen_polygon(points):
@@ -172,7 +173,8 @@ def process_image(brt, args, device):
     return img.to(device)
 
 def try_find_contours(arr, val, n_x, n_y):
-    vals_adjust = [0, -1, +1, -2, +2, -3, +3, -4, +4, -5, +5]
+    #vals_adjust = [0, -1, +1, -2, +2, -3, +3, -4, +4, -5, +5]
+    vals_adjust = [0, -1, +1, -2, +2, -3, +3]
     for val_adjust in vals_adjust:
         try:
             contours = measure.find_contours(arr, val + val_adjust)
@@ -191,6 +193,8 @@ def try_find_contours(arr, val, n_x, n_y):
 def run_pred(args, model, device, predict):
     output = []
     output_tracking = {}
+    per_frame_pred_times = []
+    per_frame_proc_times = []
     with torch.no_grad():
         with bz2.BZ2File(args.filename, 'rb') as f:
             data = cPickle.load(f)
@@ -220,7 +224,10 @@ def run_pred(args, model, device, predict):
                 image2 = process_image(brt_true[:,:,t+1], args, device)
                 padder = InputPadder(image1.shape)
                 image1, image2 = padder.pad(image1, image2)
+                tick = time.time()
                 flow_up = predict(model, image1, image2)
+                tock = time.time()
+                per_frame_pred_times.append(tock - tick)
                 img = image1[0].permute(1,2,0).detach().cpu().numpy()
                 flo = flow_up[0].permute(1,2,0).detach().cpu().numpy()
                 # map flow to rgb image
@@ -232,7 +239,8 @@ def run_pred(args, model, device, predict):
                 len_prev = 1000
                 cmax_arr = np.sum(255-flo, axis=2)**2
                 cmax_arr = 255.*cmax_arr / np.max(cmax_arr)
-                for val in range(30, 256, 2):
+                #for val in range(30, 256, 2):
+                for val in range(30, 256, 7):
                     if np.max(cmax_arr) - val < 7:
                         pred_contours += try_find_contours(cmax_arr, val-10, n_x, n_y)
                         break
@@ -244,12 +252,16 @@ def run_pred(args, model, device, predict):
             else:
                 output.append(brt_true[:,:,t])
                 image = process_image(brt_true[:,:,t], args, device)
+                tick = time.time()
                 result = predict(model, image)
+                tock = time.time()
+                per_frame_pred_times.append(tock - tick)
                 pred_masks = np.transpose(result['masks'][result['labels'] == 2][:,0,:,:].detach().cpu().numpy(), (0,2,1))
                 pred_contours = []
                 for i in range(np.shape(pred_masks)[0]):
                     pred_contours += measure.find_contours(pred_masks[i,:,:], 0.90)
             
+            tick = time.time()
             idx_valid_contours = []
             mask_shear = np.zeros((n_x, n_y))
             for i in range(len(shear_contour_y)):
@@ -330,8 +342,11 @@ def run_pred(args, model, device, predict):
                 blob_id += 1
                 active_tracklets.append({'polygon':polygon_pred_list[new_idx], 'id':blob_id, 't_history':[t], 'viou_history':[viou_list[new_idx]]})
                 output_tracking[t].append([blob_id, viou_list[new_idx], cx_list[new_idx], cy_list[new_idx], polygon_pred_list[new_idx], polygon_fwhm_list[new_idx]])
+            
+            tock = time.time()
+            per_frame_proc_times.append(tock - tick)
     
-    return output, output_tracking
+    return output, output_tracking, np.mean(per_frame_pred_times), np.mean(per_frame_proc_times)
 
 def plot_frame(t, output, output_tracking, axes, args, hand_labels=None):
     global figs_pred, figs_fwhm, figs_id, figs_hl
@@ -427,6 +442,7 @@ if __name__ == '__main__':
     parser.add_argument('--position_only', default=False, action='store_true', help='only use position-wise attention')
     parser.add_argument('--position_and_content', default=False, action='store_true', help='use position and content-wise attention')
     
+    tick_all = time.time()
     args = parser.parse_args()
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model_name = ''
@@ -500,12 +516,18 @@ if __name__ == '__main__':
             data = pickle.load(handle)
         output = data['output']
         output_tracking = data['output_tracking']
+        per_frame_pred_time = data['per_frame_pred_time']
+        per_frame_proc_time = data['per_frame_proc_time']
     else:
-        output, output_tracking = run_pred(args, model, device, predict)
-        data = {'output':np.array(output), 'output_tracking':output_tracking}
+        output, output_tracking, per_frame_pred_time, per_frame_proc_time = run_pred(args, model, device, predict)
+        data = {'output':np.array(output), 'output_tracking':output_tracking, 'per_frame_pred_time':per_frame_pred_time, 'per_frame_proc_time':per_frame_proc_time}
         with open(save_name_prefix + '.pickle', 'wb') as handle:
             pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
+    tock_all = time.time()
+    print(args.model_label + " Mean per-frame prediction time: " + str(per_frame_pred_time) + " sec")
+    print(args.model_label + " Mean per-frame processing time: " + str(per_frame_proc_time) + " sec")
+    print(args.model_label + " Total time elapsed (for tracking): " + str((tock_all - tick_all)/3600.) + " hours")
     viou_all = []
     for t in range(len(output_tracking)):
         for info in output_tracking[t]:
@@ -514,6 +536,7 @@ if __name__ == '__main__':
     print(args.model_label + " Mean VIoU: " + str(np.mean(viou_all)))
     
     if args.make_video:
+        tick_all = time.time()
         figs_pred, figs_fwhm, figs_id, figs_hl = [], [], [], []
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=20, metadata=dict(artist='Me'), bitrate=7200)
@@ -534,6 +557,8 @@ if __name__ == '__main__':
         
         anim = animation.FuncAnimation(fig, plot_frame, init_func=init, fargs=plot_args, interval=50, frames=len(output))
         anim.save(save_name_prefix + '.mp4', writer=writer)
+        tock_all = time.time()
+        print(args.model_label + " Time elapsed for making video: " + str((tock_all - tick_all)/3600.) + " hours")
 
 
 
