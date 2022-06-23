@@ -13,9 +13,9 @@ To use Mask R-CNN, you need
 
 To use Flow Walk, you need
 
-| Package | `spatial-correlation-sampler` |
-| --------| ------------------------------|
-| Version | 0.4.0                         |
+| Package | `spatial-correlation-sampler` | `easydict` |
+| --------| ------------------------------| -----------|
+| Version | 0.4.0                         | 1.9        |
 
 # Generating synthetic GPI data
 You can generate a set of synthetic GPI data for training dataset by running the shell script "run_generate_synth_gpi.sh". The synthetic blobs have their sizes, amplitudes, speeds at each moment, as well as trajactories which are randomly yet accordingly assigned to mimic the blobs in the real GPI data. The key fields used are as following:
