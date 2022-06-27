@@ -78,7 +78,7 @@ def compute_viou(pred_contours, brt, brt_minimum):
         for fwhm_contour in fwhm_contours:
             polygon_fwhm = gen_polygon([(fwhm_contour[j,0]/n_x, fwhm_contour[j,1]/n_y) for j in range(np.shape(fwhm_contour)[0])])
             intersection = polygon_pred.intersection(polygon_fwhm)
-            if intersection.area > 0.:
+            if intersection.area > 0. and polygon_pred.area > 0.1*polygon_fwhm.area and polygon_fwhm.area > 0.1*polygon_pred.area:
                 polygons_pred.append(polygon_pred)
                 polygons_fwhm.append(polygon_fwhm)
                 
