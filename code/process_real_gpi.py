@@ -4,15 +4,20 @@ import bz2
 import pickle
 import _pickle as cPickle
 from scipy.interpolate import Rbf
+import dask.array as da
 
 def upsample(args, brt_arr, r_arr, z_arr):
     n_x, n_y = args.image_size
     n_t = np.shape(brt_arr)[2]
     brt_upsampled = np.zeros((n_x, n_y, n_t))
     y_grid, x_grid = np.meshgrid(np.linspace(np.min(z_arr), np.max(z_arr), n_y), np.linspace(np.min(r_arr), np.max(r_arr), n_x))
+    ix = da.from_array(x_grid, chunks=n_x//2)
+    iy = da.from_array(y_grid, chunks=n_y//2)
     for t in range(n_t):
         idx_nan = np.isnan(brt_arr[:,:,t])
-        brt_upsampled[:,:,t] = Rbf(r_arr[~idx_nan], z_arr[~idx_nan], brt_arr[:,:,t][~idx_nan], function='cubic')(x_grid, y_grid)
+        iz = da.map_blocks(Rbf(r_arr[~idx_nan], z_arr[~idx_nan], brt_arr[:,:,t][~idx_nan], function='cubic'), ix, iy)
+        brt_upsampled[:,:,t] = iz.compute()
+        #brt_upsampled[:,:,t] = Rbf(r_arr[~idx_nan], z_arr[~idx_nan], brt_arr[:,:,t][~idx_nan], function='cubic')(x_grid, y_grid)
     
     return brt_upsampled
 
