@@ -66,7 +66,7 @@ def compute_viou(pred_contours, brt, brt_minimum):
     polygons_fwhm = []
     idx_processed = []
     for idx, current_contour in enumerate(pred_contours):
-        polygon_pred = gen_polygon([(current_contour[j,0]/n_x, current_contour[j,1]/n_y) for j in range(np.shape(current_contour)[0])])
+        polygon_pred = gen_polygon([(current_contour[j,0]/(n_x-1), current_contour[j,1]/(n_y-1)) for j in range(np.shape(current_contour)[0])])
         if polygon_pred.area == 0.:
             polygons_pred.append(None)
             polygons_fwhm.append(None)
@@ -76,7 +76,7 @@ def compute_viou(pred_contours, brt, brt_minimum):
         fwhm_contours = get_brt_contour(polygon_pred, n_x, n_y, points, brt, 0.7, brt_minimum)
         found = False
         for fwhm_contour in fwhm_contours:
-            polygon_fwhm = gen_polygon([(fwhm_contour[j,0]/n_x, fwhm_contour[j,1]/n_y) for j in range(np.shape(fwhm_contour)[0])])
+            polygon_fwhm = gen_polygon([(fwhm_contour[j,0]/(n_x-1), fwhm_contour[j,1]/(n_y-1)) for j in range(np.shape(fwhm_contour)[0])])
             intersection = polygon_pred.intersection(polygon_fwhm)
             if intersection.area > 0.:
                 polygons_pred.append(polygon_pred)
@@ -134,7 +134,7 @@ def compute_viou(pred_contours, brt, brt_minimum):
                 if intersection_fwhm_a/union_fwhm_a > 0.8:
                     
                     for fwhm_contour_merged in fwhm_contours_merged:
-                        polygon_fwhm_merged = gen_polygon([(fwhm_contour_merged[j,0]/n_x, fwhm_contour_merged[j,1]/n_y) for j in range(np.shape(fwhm_contour_merged)[0])])
+                        polygon_fwhm_merged = gen_polygon([(fwhm_contour_merged[j,0]/(n_x-1), fwhm_contour_merged[j,1]/(n_y-1)) for j in range(np.shape(fwhm_contour_merged)[0])])
                         intersection_merged = polygon_curr_merged.intersection(polygon_fwhm_merged)
                         if intersection_merged.area > 0.:
                             union_merged = polygon_curr_merged.union(polygon_fwhm_merged)
@@ -269,7 +269,7 @@ def run_pred(args, model, device, predict):
                 mask_shear[:shear_contour_x[i], shear_contour_y[i]] = 1.
             
             for i, current_contour in enumerate(pred_contours):
-                polygon_pred = gen_polygon([(current_contour[j,0]/n_x, current_contour[j,1]/n_y) for j in range(np.shape(current_contour)[0])])
+                polygon_pred = gen_polygon([(current_contour[j,0]/(n_x-1), current_contour[j,1]/(n_y-1)) for j in range(np.shape(current_contour)[0])])
                 if polygon_pred.area > 0.:
                     mask = get_poly_mask(points, polygon_pred, n_x, n_y)
                     if mask.any() and np.max(brt_true[:,:,t][mask]) > 0.5:
