@@ -1,4 +1,5 @@
 # Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device
+[![DOI](https://zenodo.org/badge/501857667.svg)](https://zenodo.org/badge/latestdoi/501857667)
 Data, models, and code for the paper "Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device" by Han et al., 2022.
 
 ![](data/real_gpi/teaser_raft.gif)
