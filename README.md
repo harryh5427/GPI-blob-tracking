@@ -1,9 +1,9 @@
 # Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device
 [![DOI](https://zenodo.org/badge/501857667.svg)](https://zenodo.org/badge/latestdoi/501857667)
 
-Data, models, and code for the paper "Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device" by Han et al., Sci Rep 12, 18142 (2022).
+Data, models, and code for the paper "Tracking Blobs in the Turbulent Edge Plasma of a Tokamak Fusion Device" by [Han et al., Sci Rep 12, 18142 (2022)](https://www.nature.com/articles/s41598-022-21671-w).
 
-GPI-blob-tracking is a package implementing image recognition frameworks from RAFT, GMA, Flow Walk, and Mask R-CNN to track turbulent structures, called blobs, in the Gas-Puff Imaging (GPI) data from tokamak boundary. Users can use the existing models trained with synthetic data for their own GPI data. Also, the training pipeline and the data files can be implemented for users' custom models and evaluate their performance as described in Han et al., Sci Rep 12, 18142 (2022).
+GPI-blob-tracking is a package implementing image recognition frameworks from RAFT, GMA, Flow Walk, and Mask R-CNN to track turbulent structures, called blobs, in the Gas-Puff Imaging (GPI) data from tokamak boundary. Users can use the existing models trained with synthetic data for their own GPI data. Also, the training pipeline and the data files can be implemented for users' custom models and evaluate their performance as described in [Han et al., Sci Rep 12, 18142 (2022)](https://www.nature.com/articles/s41598-022-21671-w).
 
 ![](data/real_gpi/teaser_raft.gif)
 
