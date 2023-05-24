@@ -74,12 +74,12 @@ As shown in the above table, your "brt_arr" is the video data recorded from each
 
 The order of `brt_arr`, `r_arr`, and `z_arr` must be arranged as, assuming 12 X 10 views:
 
-brt_arr[0, 0] at (r_arr[0, 0], z_arr[0, 0]): Bottom Left of the Field of View
-brt_arr[0, 9] at (r_arr[0, 9], z_arr[0, 9]): Top Left of the Field of View
-brt_arr[11, 0] at (r_arr[11, 0], z_arr[11, 0]): Bottom Right of the Field of View
-brt_arr[11, 9] at (r_arr[11, 9], z_arr[11, 9]): Top Right of the Field of View
+- `brt_arr[0, 0]` at (`r_arr[0, 0]`, `z_arr[0, 0]`): Bottom Left of the Field of View
+- `brt_arr[0, 9]` at (`r_arr[0, 9]`, `z_arr[0, 9]`): Top Left of the Field of View
+- `brt_arr[11, 0]` at (`r_arr[11, 0]`, `z_arr[11, 0]`): Bottom Right of the Field of View
+- `brt_arr[11, 9]` at (`r_arr[11, 9]`, `z_arr[11, 9]`): Top Right of the Field of View
 
-"shear_contour_x" and "shear_contour_y" must have the same dimension, and their indices values must correspond to the upsampled grid (i.e. you should interpolate your LCFS coordinates).
+`shear_contour_x` and `shear_contour_y` must have the same dimension, and their indices values must correspond to the upsampled grid (i.e. you should interpolate your LCFS coordinates).
 
 The processed data will be saved in "GPI-blob-tracking/data/real_gpi".
 
